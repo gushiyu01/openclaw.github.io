@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw · 开源自主AI代理</title>
+  <!-- Font Awesome 6 (免费) 科技感图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Inter + JetBrains Mono 现代代码字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* 重置 & 基础变量 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: #0b0e14;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* 渐变文本与装饰 */
+    .gradient-text {
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title span {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* 按钮 */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(145deg, #2563eb, #7c3aed);
+      color: white;
+      font-weight: 600;
+      padding: 0.9rem 2rem;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      font-weight: 500;
+      padding: 0.75rem 1.8rem;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-outline:hover {
+      background: #1e293b;
+      border-color: #60a5fa;
+      color: white;
+    }
+
+    /* 头部导航 */
+    .navbar {
+      padding: 1.5rem 0;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .logo i {
+      font-size: 2.2rem;
+      color: #60a5fa;
+      filter: drop-shadow(0 0 8px #2563eb80);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .nav-links a {
+      color: #a0afc0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    /* hero */
+    .hero {
+      padding: 5rem 0 4rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: #1e293b;
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #a0afc0;
+      border: 1px solid #334155;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #a0afc0;
+      max-width: 500px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #7f8c9f;
+    }
+
+    .hero-visual {
+      background: linear-gradient(145deg, #111827, #0f1522);
+      border-radius: 40px;
+      padding: 2rem;
+      border: 1px solid #2a3647;
+      box-shadow: 0 40px 60px -20px #00000080;
+    }
+
+    .code-snippet {
+      background: #0b0f17;
+      border-radius: 24px;
+      padding: 1.8rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.9rem;
+      border: 1px solid #293445;
+      color: #b9c6d8;
+    }
+
+    .code-snippet pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .code-snippet .keyword { color: #f97583; }
+    .code-snippet .function { color: #b392f0; }
+    .code-snippet .string { color: #9db0c9; }
+
+    /* 特性网格 */
+    .features {
+      padding: 5rem 0;
+      border-top: 1px solid #1e293b;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: #121825;
+      border: 1px solid #253040;
+      border-radius: 28px;
+      padding: 2rem;
+      transition: all 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: #3b4e6b;
+      transform: scale(1.02);
+      background: #161e2d;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      color: #60a5fa;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card p {
+      color: #99a7b9;
+      font-size: 1rem;
+    }
+
+    /* 使用流程 / 快速开始 */
+    .quickstart {
+      padding: 5rem 0;
+      background: #0e131f;
+    }
+
+    .quickstart-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      background: linear-gradient(145deg, #1e2a44, #121b2f);
+      width: 48px;
+      height: 48px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #60a5fa;
+      border: 1px solid #314463;
+    }
+
+    .step-content h4 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-content p {
+      color: #9aa9bb;
+    }
+
+    .code-block {
+      background: #0a0e17;
+      border-radius: 24px;
+      padding: 1.2rem 1.8rem;
+      border: 1px solid #28344a;
+      font-family: "JetBrains Mono", monospace;
+      display: inline-block;
+      color: #b7c7e0;
+      margin-top: 0.8rem;
+    }
+
+    /* 开源社区 */
+    .community {
+      padding: 5rem 0;
+      text-align: center;
+      border-top: 1px solid #1e293b;
+    }
+
+    .community h2 {
+      font-size: 2.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .community p {
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      color: #a0afc0;
+    }
+
+    .community-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: #1a2332;
+      padding: 0.8rem 1.8rem;
+      border-radius: 50px;
+      border: 1px solid #2f3d54;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .badge i {
+      color: #60a5fa;
+    }
+
+    .footer {
+      padding: 2.5rem 0;
+      border-top: 1px solid #1e293b;
+      color: #708197;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links a {
+      color: #8f9fb2;
+      text-decoration: none;
+      margin-left: 2rem;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid, .features-grid, .quickstart-steps {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
+      .hero h1 {
+        font-size: 2.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 导航栏 -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fas fa-claw"></i> <!-- 近似爪印 / 抓取图标，象征AI代理执行任务 -->
+          <span>Open<span class="gradient-text">Claw</span></span>
+        </div>
+        <div class="nav-links">
+          <a href="#">主页</a>
+          <a href="#">文档</a>
+          <a href="#">GitHub</a>
+          <a href="#">社区</a>
+        </div>
+        <a href="#" class="btn-outline" style="padding:0.6rem 1.5rem"><i class="fab fa-github"></i> Star</a>
+      </div>
+    </nav>
+
+    <!-- Hero 部分 -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="hero-badge"><i class="fas fa-robot" style="margin-right: 0.4rem;"></i> 自主AI代理 · 开源 · 通用</span>
+          <h1>
+            让<span class="gradient-text"> OpenClaw </span><br>替你完成复杂任务
+          </h1>
+          <p>一个能自主规划、调用工具、编写代码并执行的开源AI代理。像人类一样使用浏览器、终端和API。</p>
+          <div class="hero-cta">
+            <a href="#" class="btn-primary"><i class="fas fa-terminal"></i> 快速开始</a>
+            <a href="#" class="btn-outline"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">14.2k</span>
+              <span class="stat-label">GitHub Stars</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">3.5k+</span>
+              <span class="stat-label">社区成员</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">1.6k</span>
+              <span class="stat-label">Forks</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="code-snippet">
+            <pre><span class="keyword">from</span> openclaw <span class="keyword">import</span> Agent
+
+<span class="comment"># 创建一个OpenClaw代理实例</span>
+agent = Agent(
+    model=<span class="string">"claw-3.5-sonnet"</span>,
+    tools=[<span class="string">"browser"</span>, <span class="string">"python"</span>, <span class="string">"shell"</span>]
+)
+
+<span class="comment"># 交给它一个任务</span>
+result = agent.run(<span class="string">"""
+    访问 GitHub 上 openclaw 仓库的 issues 页，
+    提取所有标有“good first issue”的标题，
+    并用表格形式保存到 report.md
+"""</span>)
+
+<span class="function">print</span>(result)</pre>
+          </div>
+          <p style="margin-top: 1.2rem; color: #7c8ba0;"><i class="fas fa-play" style="color: #60a5fa;"></i> 几行代码，开启自动执行</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 特性部分 (全宽背景) -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title"><span>核心能力</span> — 不只是对话</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-sitemap"></i></div>
+          <h3>自主任务规划</h3>
+          <p>基于思维链动态拆解复杂目标，递归规划子任务，并能根据中间结果实时调整策略。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-toolbox"></i></div>
+          <h3>全场景工具调用</h3>
+          <p>内置浏览器自动化、Python解释器、Shell、文件读写、API请求等工具，也可自定义扩展。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-code"></i></div>
+          <h3>代码即行动</h3>
+          <p>代理能自行编写、调试、运行代码（Python/JavaScript等），实现数据处理、爬虫、分析等。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-image"></i></div>
+          <h3>多模态感知</h3>
+          <p>支持图像、PDF、表格等多格式输入；可利用视觉模型理解屏幕截图、图表内容。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-memory"></i></div>
+          <h3>长期记忆</h3>
+          <p>通过向量存储记录历史经验，跨会话复用知识，持续优化任务执行效率。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+          <h3>安全沙箱</h3>
+          <p>所有代码和工具均在隔离容器内执行，提供权限控制与审计日志，保障环境安全。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 快速开始 / 安装 -->
+  <section class="quickstart">
+    <div class="container">
+      <h2 class="section-title"><span>🚀 快速开始</span> 两分钟启动代理</h2>
+      <div class="quickstart-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>安装 OpenClaw</h4>
+            <p>通过pip一键安装核心库</p>
+            <div class="code-block">pip install openclaw</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>配置API密钥</h4>
+            <p>设置你的模型提供商密钥（OpenAI/Anthropic等）</p>
+            <div class="code-block">export OPENAI_API_KEY=sk-...</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>运行首个任务</h4>
+            <p>启动交互式CLI或直接运行脚本</p>
+            <div class="code-block">claw run "总结今天的Hacker News头条"</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="#" class="btn-primary"><i class="fas fa-book-open"></i> 阅读完整文档</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 社区 & 开源 -->
+  <section class="community">
+    <div class="container">
+      <h2 class="gradient-text">❤️ 开源 · 共建 · 透明</h2>
+      <p>OpenClaw 由全球开发者共同维护，完全免费且持续迭代。我们欢迎任何形式的贡献。</p>
+      <div class="community-badges">
+        <div class="badge"><i class="fab fa-github"></i> 14.2k stars</div>
+        <div class="badge"><i class="fas fa-code-branch"></i> 1.6k forks</div>
+        <div class="badge"><i class="fas fa-users"></i> 340+ contributors</div>
+        <div class="badge"><i class="fab fa-discord"></i> Discord</div>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="#" class="btn-outline"><i class="fas fa-star"></i> Star on GitHub</a>
+        <a href="#" class="btn-outline"><i class="fas fa-bug"></i> Report Issue</a>
+        <a href="#" class="btn-outline"><i class="fas fa-code-pull-request"></i> Contribute</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <div class="container">
+    <footer class="footer">
+      <div>© 2025 OpenClaw · 开源AI代理 · MIT License</div>
+      <div class="footer-links">
+        <a href="#">文档</a>
+        <a href="#">GitHub</a>
+        <a href="#">Twitter</a>
+        <a href="#">法律声明</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
